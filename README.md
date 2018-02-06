@@ -26,12 +26,22 @@ val ec: ExecutionContext = new TracedExecutionContext(executionContext, tracer);
 
 ### Span Propagation
 
+#### Scala
+```scala
+Future {
+  // The active Span at Future creation time, if any,  
+  // will be captured and restored here.
+  tracer.scopeManager().active().setTag("status.code", getStatusCode())
+}(ec)
+```
+
+#### Java
 ```java
 future(new Callable<String>() {
     @Override
     public String call() {
-	// The active Span at Future creation time, if any,
-	// will be captured and restored here.
+        // The active Span at Future creation time, if any,  
+        // will be captured and restored here.
         tracer.scopeManager().active().setTag("status.code", getStatusCode());
     }
 }, ec);
@@ -47,6 +57,17 @@ and hence explicit calls to `Span.finish()` must be put in place - usually
 either in the last `Future`/message block or in a `onComplete` callback
 function:
 
+#### Scala
+```scala
+Future {  
+   ...
+}(ec).onComplete { _ => {
+  tracer.scopeManager().active().span().finish()
+}
+}(ec)
+```
+
+#### Java
 ```java
 future(new Callable<String>() {
     ...
@@ -66,6 +87,29 @@ Span auto-finish is supported through a reference-count system using the specifi
 `AutoFinishScopeManager` -which needs to be provided at `Tracer` creation time-,
 along with using `TracedAutoFinishExecutionContext`:
 
+#### Scala
+```scala
+val scopeManager = new AutoFinishScopeManager();
+val tracer: Tracer = ??? // Use the created scopeManager here.
+val ec = new TracedAutoFinishExecutionContext(executionContext, tracer)
+...
+val scope = tracer.buildSpan("request").startActive(true)
+try {
+    Future {
+	// Span will be reactivated here
+	...
+	Future {
+	    // Span will be reactivated here as well.  
+	    // By the time this future is done,  
+	    // the Span will be automatically finished.
+	  } (ec)
+  } (ec)
+} finally {
+ scope.close()
+}
+```
+
+#### Java
 ```java
 ScopeManager scopeManager = new AutoFinishScopeManager();
 Tracer tracer = ... // Use the created scopeManager here.
@@ -88,6 +132,19 @@ Reference count for `Span`s is set to 1 at creation, and is increased when
 registering `onComplete`, `andThen`, `map`, and similar
 `Future` methods - and is decreased upon having such function/callback executed:
 
+#### Scala
+```scala
+Future {
+    ...
+}(ec)
+.map {...}(ec)
+.onComplete {
+    // No need to call `Span.finish()` here at all, as  
+    // lifetime handling is done implicitly.
+}(ec)
+```
+
+#### Java
 ```java
 future(new Callable<String>() {
     ...
