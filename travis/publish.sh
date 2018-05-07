@@ -60,7 +60,7 @@ check_travis_branch_equals_travis_tag() {
 
 check_release_tag() {
     tag="${TRAVIS_TAG}"
-    if [[ "$tag" =~ ^[[:digit:]]+\.[[:digit:]]+\.[[:digit:]]+_[[:digit:]]+\.[[:digit:]]+$ ]]; then
+    if [[ "$tag" =~ ^opentracing-scala-concurrent_[[:digit:]]+\.[[:digit:]]+-[[:digit:]]+\.[[:digit:]]+\.[[:digit:]]+$ ]]; then
         echo "Build started by version tag $tag. During the release process tags like this"
         echo "are created by the 'release' Maven plugin. Nothing to do here."
         exit 0
