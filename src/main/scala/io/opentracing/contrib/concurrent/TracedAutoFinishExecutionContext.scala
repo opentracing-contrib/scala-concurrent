@@ -39,12 +39,14 @@ class TracedAutoFinishExecutionContext(ec: ExecutionContext, tracer: Tracer) ext
     val continuation: AutoFinishScope#Continuation = scope.asInstanceOf[AutoFinishScope].capture
 
     override def execute(command: Runnable): Unit = {
-      ec.execute(() => {
-        val scope = continuation.activate()
-        try {
-          command.run()
-        } finally {
-          scope.close()
+      ec.execute(new Runnable {
+        override def run(): Unit = {
+          val scope = continuation.activate()
+          try {
+            command.run()
+          } finally {
+            scope.close()
+          }
         }
       })
     }

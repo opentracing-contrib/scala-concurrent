@@ -169,7 +169,9 @@ class TracedExecutionContextTest extends FunSuite with BeforeAndAfter {
   }
 
   private def reportedSpansSize(mockTracer: MockTracer): Callable[Int] = {
-    () => mockTracer.finishedSpans().size()
+    new Callable[Int] {
+      override def call(): Int = mockTracer.finishedSpans().size()
+    }
   }
 
 }

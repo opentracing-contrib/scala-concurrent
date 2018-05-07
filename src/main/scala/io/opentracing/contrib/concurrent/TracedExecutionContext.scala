@@ -13,7 +13,7 @@
  */
 package io.opentracing.contrib.concurrent
 
-import io.opentracing.Tracer
+import io.opentracing.{Span, Tracer}
 import io.opentracing.util.GlobalTracer
 
 import scala.concurrent.{ExecutionContext, ExecutionContextExecutor}
@@ -38,21 +38,22 @@ class TracedExecutionContext(ec: ExecutionContext, tracer: Tracer, createSpans: 
 
   class TracedExecutionContextImpl extends ExecutionContextExecutor {
 
-    val activeSpan = if (createSpans) tracer.buildSpan(Constants.EXECUTE_OPERATION_NAME).start()
+    val activeSpan: Span = if (createSpans) tracer.buildSpan(Constants.EXECUTE_OPERATION_NAME).start()
     else tracer.scopeManager.active.span
 
     override def reportFailure(cause: Throwable): Unit = ec.reportFailure(cause)
 
     override def execute(command: Runnable): Unit = {
-      ec.execute(() => {
-        // Only deactivate the active Span if we created/own it.
-        val scope = tracer.scopeManager.activate(activeSpan, createSpans)
-        try {
-          command.run()
-        } finally {
-          scope.close()
+      ec.execute(new Runnable {
+        override def run(): Unit = {
+          // Only deactivate the active Span if we created/own it.
+          val scope = tracer.scopeManager.activate(activeSpan, createSpans)
+          try {
+            command.run()
+          } finally {
+            scope.close()
+          }
         }
-
       })
     }
   }

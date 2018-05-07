@@ -7,7 +7,7 @@ OpenTracing instrumentation for `scala.concurrent` package.
 
 build.sbt
 ```sbt
-libraryDependencies += "io.opentracing.contrib" % "opentracing-scala-concurrent" % "VERSION"
+libraryDependencies += "io.opentracing.contrib" % "opentracing-scala-concurrent_2.12" % "VERSION"
 ```
 
 ## Usage
