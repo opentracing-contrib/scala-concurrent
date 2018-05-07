@@ -82,7 +82,7 @@ is_release_commit() {
 }
 
 release_version() {
-    echo "${TRAVIS_TAG}" | sed 's/^release-//'
+    echo "${TRAVIS_TAG}" | sed 's/^release-//' | sed 's/_[0-9].[0-9]*//'
 }
 
 safe_checkout_master() {
