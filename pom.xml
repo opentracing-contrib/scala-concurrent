@@ -14,7 +14,9 @@
     the License.
 
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>io.opentracing.contrib</groupId>
   <artifactId>opentracing-scala-concurrent_${scala.compat.version}</artifactId>
@@ -61,6 +63,12 @@
     <project.build.resourceEncoding>UTF-8</project.build.resourceEncoding>
 
     <opentracing.version>0.31.0</opentracing.version>
+
+    <!--<scala.compat.version>2.12</scala.compat.version>-->
+    <!--<scala.version>2.12.6</scala.version>-->
+
+    <scala.compat.version>2.11</scala.compat.version>
+    <scala.version>2.11.12</scala.version>
   </properties>
 
   <dependencies>
@@ -217,26 +225,6 @@
   </distributionManagement>
 
   <profiles>
-    <profile>
-      <id>scala_2.11</id>
-      <activation>
-        <activeByDefault>true</activeByDefault>
-      </activation>
-      <properties>
-        <scala.version>2.11.12</scala.version>
-        <scala.compat.version>2.11</scala.compat.version>
-      </properties>
-    </profile>
-    <profile>
-      <id>scala_2.12</id>
-      <!--<activation>-->
-        <!--<activeByDefault>true</activeByDefault>-->
-      <!--</activation>-->
-      <properties>
-        <scala.version>2.12.6</scala.version>
-        <scala.compat.version>2.12</scala.compat.version>
-      </properties>
-    </profile>
     <profile>
       <id>release</id>
       <build>
