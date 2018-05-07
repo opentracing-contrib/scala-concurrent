@@ -136,7 +136,6 @@
           <useReleaseProfile>false</useReleaseProfile>
           <releaseProfiles>release</releaseProfiles>
           <autoVersionSubmodules>true</autoVersionSubmodules>
-          <tagNameFormat>@{project.version}_{scala.compat.version}</tagNameFormat>
         </configuration>
       </plugin>
       <plugin>
