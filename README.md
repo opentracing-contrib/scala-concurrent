@@ -97,5 +97,5 @@ Future {
 
 [ci-img]: https://travis-ci.org/opentracing-contrib/scala-concurrent.svg?branch=master
 [ci]: https://travis-ci.org/opentracing-contrib/scala-concurrent
-[maven-img]: https://img.shields.io/maven-central/v/io.opentracing.contrib/opentracing-scala-concurrent.svg
-[maven]: http://search.maven.org/#search%7Cga%7C1%7Copentracing-scala-concurrent
+[maven-img]: https://img.shields.io/maven-central/v/io.opentracing.contrib/opentracing-scala-concurrent_2.12.svg
+[maven]: http://search.maven.org/#search%7Cga%7C1%7Copentracing-scala-concurrent_2.12
