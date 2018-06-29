@@ -1,4 +1,4 @@
-[![Build Status][ci-img]][ci] [![Released Version][maven-img]][maven]
+[![Build Status][ci-img]][ci] [![Coverage Status][cov-img]][cov] [![Released Version][maven-img]][maven]
 
 # OpenTracing instrumentation for `scala.concurrent`
 OpenTracing instrumentation for `scala.concurrent` package.
@@ -97,5 +97,7 @@ Future {
 
 [ci-img]: https://travis-ci.org/opentracing-contrib/scala-concurrent.svg?branch=master
 [ci]: https://travis-ci.org/opentracing-contrib/scala-concurrent
+[cov-img]: https://coveralls.io/repos/github/opentracing-contrib/scala-concurrent/badge.svg?branch=master
+[cov]: https://coveralls.io/github/opentracing-contrib/scala-concurrent?branch=master
 [maven-img]: https://img.shields.io/maven-central/v/io.opentracing.contrib/opentracing-scala-concurrent_2.12.svg
 [maven]: http://search.maven.org/#search%7Cga%7C1%7Copentracing-scala-concurrent_2.12
