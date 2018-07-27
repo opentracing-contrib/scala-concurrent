@@ -95,6 +95,10 @@ Future {
 }(ec)
 ```
 
+## License
+
+[Apache 2.0 License](./LICENSE).
+
 [ci-img]: https://travis-ci.org/opentracing-contrib/scala-concurrent.svg?branch=master
 [ci]: https://travis-ci.org/opentracing-contrib/scala-concurrent
 [cov-img]: https://coveralls.io/repos/github/opentracing-contrib/scala-concurrent/badge.svg?branch=master
