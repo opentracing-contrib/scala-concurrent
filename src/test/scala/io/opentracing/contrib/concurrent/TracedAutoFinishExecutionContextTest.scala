@@ -84,22 +84,23 @@ class TracedAutoFinishExecutionContextTest extends FunSuite with BeforeAndAfter 
     val scope = mockTracer.buildSpan("one").startActive(true)
 
     try
-        for (_ <- 0 until 5) {
-          futures += Future[Span] {
-            val sleepMs: Int = rand.nextInt(500)
-            Thread.sleep(sleepMs)
+      for (_ <- 0 until 5) {
+        futures += Future[Span] {
+          val sleepMs: Int = rand.nextInt(500)
+          Thread.sleep(sleepMs)
 
-            val activeSpan: Span = mockTracer.scopeManager.active.span
-            assert(activeSpan != null)
-            activeSpan.setTag(Integer.toString(sleepMs), true)
-            activeSpan
-          }(ec)
-        }
+          val activeSpan: Span = mockTracer.scopeManager.active.span
+          assert(activeSpan != null)
+          activeSpan.setTag(Integer.toString(sleepMs), true)
+          activeSpan
+        }(ec)
+      }
     finally {
       scope.close()
     }
 
-    Await.result(Future.sequence(futures)(implicitly, ec), Duration(15, TimeUnit.SECONDS))
+    implicit val implicitContext = ec
+    Await.result(Future.sequence(futures), Duration(15, TimeUnit.SECONDS))
     await.atMost(15, TimeUnit.SECONDS).until(reportedSpansSize(mockTracer), equalTo(1))
     assert(1 == mockTracer.finishedSpans.size)
     assert(5 == mockTracer.finishedSpans.get(0).tags.size)
