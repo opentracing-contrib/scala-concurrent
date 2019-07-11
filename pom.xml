@@ -17,7 +17,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>io.opentracing.contrib</groupId>
-  <artifactId>opentracing-scala-concurrent_2.12</artifactId>
+  <artifactId>opentracing-scala-concurrent_2.13</artifactId>
   <version>0.0.5-SNAPSHOT</version>
 
   <name>${project.groupId}:${project.artifactId}</name>
@@ -62,8 +62,11 @@
 
     <opentracing.version>0.31.0</opentracing.version>
 
-    <scala.compat.version>2.12</scala.compat.version>
-    <scala.version>2.12.6</scala.version>
+    <scala.compat.version>2.13</scala.compat.version>
+    <scala.version>2.13.0</scala.version>
+
+    <!--<scala.compat.version>2.12</scala.compat.version>-->
+    <!--<scala.version>2.12.8</scala.version>-->
 
     <!--<scala.compat.version>2.11</scala.compat.version>-->
     <!--<scala.version>2.11.12</scala.version>-->
@@ -103,7 +106,7 @@
     <dependency>
       <groupId>org.scalatest</groupId>
       <artifactId>scalatest_${scala.compat.version}</artifactId>
-      <version>3.0.4</version>
+      <version>3.0.8</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
