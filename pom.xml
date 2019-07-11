@@ -18,7 +18,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>io.opentracing.contrib</groupId>
   <artifactId>opentracing-scala-concurrent_2.13</artifactId>
-  <version>0.0.5</version>
+  <version>0.0.6-SNAPSHOT</version>
 
   <name>${project.groupId}:${project.artifactId}</name>
   <description>OpenTracing Instrumentation for Scala concurrent package</description>
@@ -30,7 +30,7 @@
     <connection>scm:git:https://github.com/opentracing-contrib/scala-concurrent.git</connection>
     <developerConnection>scm:git:https://github.com/opentracing-contrib/scala-concurrent.git
     </developerConnection>
-    <tag>opentracing-scala-concurrent_2.13-0.0.5</tag>
+    <tag>HEAD</tag>
   </scm>
 
   <licenses>
