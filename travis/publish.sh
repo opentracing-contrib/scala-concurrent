@@ -65,7 +65,7 @@ check_release_tag() {
         echo "are created by the 'release' Maven plugin. Nothing to do here."
         exit 0
     elif [[ ! "$tag" =~ ^release-[[:digit:]]+\.[[:digit:]]+\.[[:digit:]]+_[[:digit:]]+\.[[:digit:]]+$ ]]; then
-        echo "You must specify a tag of the format 'release-1.2.3_2.12' to release this project."
+        echo "You must specify a tag of the format 'release-1.2.3_2.13' to release this project."
         echo "The provided tag ${tag} doesn't match that. Aborting."
         exit 1
     fi

@@ -8,4 +8,5 @@ For the up-to-date release process, please refer the
 
 Release tag should have format: 
 - `release-0.0.1_2.11`
-- `release-0.0.1_2.12`
+- `release-0.0.1_2.11`
+- `release-0.0.1_2.13`
