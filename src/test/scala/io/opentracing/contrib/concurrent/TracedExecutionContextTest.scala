@@ -13,12 +13,11 @@
  */
 package io.opentracing.contrib.concurrent
 
-import java.util
 import java.util.concurrent.{Callable, TimeUnit}
 
 import io.opentracing.Span
 import io.opentracing.mock.MockTracer.Propagator
-import io.opentracing.mock.{MockSpan, MockTracer}
+import io.opentracing.mock.MockTracer
 import io.opentracing.util.ThreadLocalScopeManager
 import org.awaitility.Awaitility.await
 import org.hamcrest.core.IsEqual.equalTo
@@ -37,34 +36,27 @@ class TracedExecutionContextTest extends FunSuite with BeforeAndAfter {
 
   test("testIllegalContext") {
     intercept[IllegalArgumentException] {
-      new TracedExecutionContext(null, mockTracer, false)
+      new TracedExecutionContext(null, mockTracer)
     }
   }
 
   test("testIllegalTracer") {
     intercept[IllegalArgumentException] {
-      new TracedExecutionContext(ExecutionContext.global, null, false)
+      new TracedExecutionContext(ExecutionContext.global, null)
     }
   }
 
   test("testPropagation") {
     val ec = new TracedExecutionContext(ExecutionContext.global, mockTracer)
     var f: Future[Span] = null
-    var span: Span = null
 
-    val scope = mockTracer.buildSpan("one").startActive(false)
+    val span = mockTracer.buildSpan("one").start()
+    mockTracer.scopeManager().activate(span)
 
-
-    try {
-      span = scope.span
-      f = Future[Span] {
-        assert(mockTracer.scopeManager.active != null)
-        mockTracer.scopeManager.active.span
-      }(ec)
-    } finally {
-      scope.close()
-    }
-
+    f = Future[Span] {
+      assert(mockTracer.scopeManager.activeSpan() != null)
+      mockTracer.scopeManager.activeSpan()
+    }(ec)
 
     val result = Await.result(f, Duration(15, TimeUnit.SECONDS))
     assert(span == result)
@@ -72,45 +64,14 @@ class TracedExecutionContextTest extends FunSuite with BeforeAndAfter {
 
     span.finish()
     assert(1 == mockTracer.finishedSpans.size)
-    assert(span == mockTracer.finishedSpans.get(0))
   }
-
-  test("testCreateSpans") {
-    val ec = new TracedExecutionContext(ExecutionContext.global, mockTracer, true)
-    var parentSpan: Span = null
-    val scope = mockTracer.buildSpan("parent").startActive(false)
-    var f: Future[Span] = null
-
-    try {
-      parentSpan = scope.span
-      f = Future[Span] {
-        assert(mockTracer.scopeManager.active != null)
-        mockTracer.scopeManager.active.span
-      }(ec)
-    } finally {
-      scope.close()
-    }
-
-    val span: Span = Await.result(f, Duration(15, TimeUnit.SECONDS))
-    await.atMost(15, TimeUnit.SECONDS).until(reportedSpansSize(mockTracer), equalTo(1))
-    assert(1 == mockTracer.finishedSpans.size)
-
-    parentSpan.finish()
-    val finishedSpans: util.List[MockSpan] = mockTracer.finishedSpans
-    assert(2 == finishedSpans.size)
-    assert(parentSpan == finishedSpans.get(1))
-    assert(span == finishedSpans.get(0))
-    assert(finishedSpans.get(1).context.spanId == finishedSpans.get(0).parentId)
-
-  }
-
 
   test("testNoActiveSpan") {
     val ec = new TracedExecutionContext(ExecutionContext.global, mockTracer)
 
     val f: Future[Boolean] = Future[Boolean] {
-      assert(mockTracer.scopeManager.active == null)
-      mockTracer.scopeManager.active != null
+      assert(mockTracer.scopeManager.activeSpan() == null)
+      mockTracer.scopeManager.activeSpan != null
     }(ec)
 
     val isActive = Await.result(f, Duration(15, TimeUnit.SECONDS))
@@ -122,8 +83,8 @@ class TracedExecutionContextTest extends FunSuite with BeforeAndAfter {
     val ec = new TracedExecutionContext(ExecutionContext.global)
 
     val f: Future[Boolean] = Future[Boolean] {
-      assert(mockTracer.scopeManager.active == null)
-      mockTracer.scopeManager.active != null
+      assert(mockTracer.scopeManager.activeSpan == null)
+      mockTracer.scopeManager.activeSpan != null
     }(ec)
 
     val isActive = Await.result(f, Duration(15, TimeUnit.SECONDS))
@@ -134,26 +95,27 @@ class TracedExecutionContextTest extends FunSuite with BeforeAndAfter {
   test("testConvert") {
     val ec = new TracedExecutionContext(ExecutionContext.global, mockTracer)
 
-    val scope = mockTracer.buildSpan("one").startActive(false)
+    val scope = mockTracer.buildSpan("one").start()
+    mockTracer.scopeManager().activate(scope)
 
     try {
       Future[Boolean] {
-        assert(mockTracer.scopeManager.active != null)
-        mockTracer.scopeManager.active.span.setTag("main", true)
+        assert(mockTracer.scopeManager.activeSpan() != null)
+        mockTracer.scopeManager.activeSpan().setTag("main", true)
         true
       }(ec).andThen {
         case Success(_) =>
-          assert(mockTracer.scopeManager.active != null)
-          mockTracer.scopeManager.active.span.setTag("interceptor", true)
+          assert(mockTracer.scopeManager.activeSpan() != null)
+          mockTracer.scopeManager.activeSpan().setTag("interceptor", true)
         case Failure(_: Throwable) => fail()
       }(ec).onComplete { _ => {
-        assert(mockTracer.scopeManager.active != null)
-        mockTracer.scopeManager.active.span.setTag("done", true)
-        mockTracer.scopeManager.active.span.finish()
+        assert(mockTracer.scopeManager.activeSpan() != null)
+        mockTracer.scopeManager.activeSpan().setTag("done", true)
+        mockTracer.scopeManager.activeSpan().finish()
       }
       }(ec)
     } finally {
-      scope.close()
+      scope.finish()
     }
 
     await.atMost(15, TimeUnit.SECONDS).until(reportedSpansSize(mockTracer), equalTo(1))

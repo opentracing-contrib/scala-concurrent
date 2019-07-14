@@ -53,48 +53,6 @@ Future {
 }(ec)
 ```
 
-### Auto finish Span handling
-
-Span auto-finish is supported through a reference-count system using the specific
-`AutoFinishScopeManager` -which needs to be provided at `Tracer` creation time-,
-along with using `TracedAutoFinishExecutionContext`:
-
-```scala
-val scopeManager = new AutoFinishScopeManager();
-val tracer: Tracer = ??? // Use the created scopeManager here.
-val ec = new TracedAutoFinishExecutionContext(executionContext, tracer)
-...
-val scope = tracer.buildSpan("request").startActive(true)
-try {
-    Future {
-	// Span will be reactivated here
-	...
-	Future {
-	    // Span will be reactivated here as well.  
-	    // By the time this future is done,  
-	    // the Span will be automatically finished.
-	  } (ec)
-  } (ec)
-} finally {
- scope.close()
-}
-```
-
-Reference count for `Span`s is set to 1 at creation, and is increased when
-registering `onComplete`, `andThen`, `map`, and similar
-`Future` methods - and is decreased upon having such function/callback executed:
-
-```scala
-Future {
-    ...
-}(ec)
-.map {...}(ec)
-.onComplete {
-    // No need to call `Span.finish()` here at all, as  
-    // lifetime handling is done implicitly.
-}(ec)
-```
-
 ## License
 
 [Apache 2.0 License](./LICENSE).

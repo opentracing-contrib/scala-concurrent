@@ -60,7 +60,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.build.resourceEncoding>UTF-8</project.build.resourceEncoding>
 
-    <opentracing.version>0.31.0</opentracing.version>
+    <opentracing.version>0.33.0</opentracing.version>
 
     <scala.compat.version>2.13</scala.compat.version>
     <scala.version>2.13.0</scala.version>
