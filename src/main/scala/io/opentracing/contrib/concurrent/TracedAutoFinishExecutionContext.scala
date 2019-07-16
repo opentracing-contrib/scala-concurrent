@@ -13,7 +13,7 @@
  */
 package io.opentracing.contrib.concurrent
 
-import io.opentracing.util.{AutoFinishScope, GlobalTracer}
+import io.opentracing.util.GlobalTracer
 import io.opentracing.{Scope, Tracer}
 
 import scala.concurrent.{ExecutionContext, ExecutionContextExecutor}
