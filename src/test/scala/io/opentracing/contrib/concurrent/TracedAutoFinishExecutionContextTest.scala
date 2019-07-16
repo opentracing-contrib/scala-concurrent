@@ -19,7 +19,6 @@ import java.util.concurrent.{Callable, TimeUnit}
 import io.opentracing.Span
 import io.opentracing.mock.MockTracer
 import io.opentracing.mock.MockTracer.Propagator
-import io.opentracing.util.AutoFinishScopeManager
 import org.awaitility.Awaitility.await
 import org.hamcrest.core.IsEqual.equalTo
 import org.scalatest.{BeforeAndAfter, FunSuite}
@@ -57,8 +56,8 @@ class TracedAutoFinishExecutionContextTest extends FunSuite with BeforeAndAfter 
     try {
       span = scope.span
       f = Future[Span] {
-
-        val activeSpan: Span = mockTracer.scopeManager.active.span
+        val activeScope = mockTracer.scopeManager.active
+        val activeSpan = activeScope.span
         activeSpan.setTag("done", true)
         activeSpan
       }(ec)
