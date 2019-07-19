@@ -21,7 +21,7 @@ class AutoFinishScope(manager: AutoFinishScopeManager, refCount: AtomicInteger, 
   private val toRestore: AutoFinishScope = manager.tlsScope.get
   manager.tlsScope.set(this)
 
-  def capture: AutoFinishScope#Continuation = new Continuation
+  private[concurrent] def capture: AutoFinishScope#Continuation = new Continuation
 
   override def close(): Unit = {
     if (this.manager.tlsScope.get eq this) {
@@ -34,7 +34,7 @@ class AutoFinishScope(manager: AutoFinishScopeManager, refCount: AtomicInteger, 
 
   override def span: Span = wrapped
 
-  class Continuation() {
+  private[concurrent] class Continuation() {
     refCount.incrementAndGet
 
     def activate() = new AutoFinishScope(manager, refCount, wrapped)

@@ -36,7 +36,7 @@ class AutoFinishScopeManager extends ScopeManager {
     Option(tlsScope.get).map(_.span).orNull
   }
 
-  def captureScope: AutoFinishScope#Continuation = {
+  private[concurrent] def captureScope: AutoFinishScope#Continuation = {
     Option(tlsScope.get).map(_.capture).orNull
   }
 }
