@@ -27,9 +27,7 @@ class TracedExecutionContext(ec: ExecutionContext, tracer: Tracer, createSpans: 
   if (tracer == null) throw new IllegalArgumentException("tracer")
 
   override def prepare(): ExecutionContext = {
-    if (!createSpans && tracer.scopeManager.active == null) return ec // Nothing to propagate/do.
-
-    new TracedExecutionContextImpl
+    if (!createSpans && tracer.scopeManager.active == null) ec else new TracedExecutionContextImpl
   }
 
   override def reportFailure(cause: Throwable): Unit = ec.reportFailure(cause)
