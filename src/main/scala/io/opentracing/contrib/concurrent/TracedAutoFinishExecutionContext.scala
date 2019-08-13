@@ -13,8 +13,8 @@
  */
 package io.opentracing.contrib.concurrent
 
+import io.opentracing.Tracer
 import io.opentracing.util.GlobalTracer
-import io.opentracing.{Scope, Tracer}
 
 import scala.concurrent.{ExecutionContext, ExecutionContextExecutor}
 
@@ -25,7 +25,7 @@ class TracedAutoFinishExecutionContext(ec: ExecutionContext, tracer: Tracer) ext
   if (tracer == null) throw new IllegalArgumentException("tracer")
 
   override def prepare(): ExecutionContext = {
-    if (tracer.scopeManager.active == null) ec else new TracedAutoFinishExecutionContextImpl
+    if (tracer.scopeManager.activeSpan() == null) ec else new TracedAutoFinishExecutionContextImpl
   }
 
   override def reportFailure(cause: Throwable): Unit = ec.reportFailure(cause)
@@ -34,9 +34,11 @@ class TracedAutoFinishExecutionContext(ec: ExecutionContext, tracer: Tracer) ext
 
 
   class TracedAutoFinishExecutionContextImpl extends ExecutionContextExecutor {
-    val continuation: AutoFinishScope#Continuation = Option(tracer.scopeManager.active) match {
-      case Some(scope: AutoFinishScope) => scope.capture
-      case _ => throw new IllegalStateException("Usage of AutoFinishScopeManager required.")
+    val continuation: AutoFinishScope#Continuation = {
+      Option(tracer.scopeManager()) match {
+        case Some(manager: AutoFinishScopeManager) => manager.tlsScope.get().capture
+        case _ => throw new IllegalStateException("Usage of AutoFinishScopeManager required.")
+      }
     }
 
     override def execute(command: Runnable): Unit = {

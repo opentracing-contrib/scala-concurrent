@@ -32,7 +32,7 @@ class AutoFinishScope(manager: AutoFinishScopeManager, refCount: AtomicInteger, 
     }
   }
 
-  override def span: Span = wrapped
+  def span: Span = wrapped
 
   private[concurrent] class Continuation() {
     refCount.incrementAndGet

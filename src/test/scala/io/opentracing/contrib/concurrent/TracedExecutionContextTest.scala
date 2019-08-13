@@ -16,10 +16,10 @@ package io.opentracing.contrib.concurrent
 import java.util
 import java.util.concurrent.{Callable, TimeUnit}
 
-import io.opentracing.Span
 import io.opentracing.mock.MockTracer.Propagator
 import io.opentracing.mock.{MockSpan, MockTracer}
 import io.opentracing.util.ThreadLocalScopeManager
+import io.opentracing.{Scope, Span}
 import org.awaitility.Awaitility.await
 import org.hamcrest.core.IsEqual.equalTo
 import org.scalatest.{BeforeAndAfter, FunSuite}
@@ -50,16 +50,14 @@ class TracedExecutionContextTest extends FunSuite with BeforeAndAfter {
   test("testPropagation") {
     val ec = new TracedExecutionContext(ExecutionContext.global, mockTracer)
     var f: Future[Span] = null
-    var span: Span = null
 
-    val scope = mockTracer.buildSpan("one").startActive(false)
-
+    val span = mockTracer.buildSpan("one").start
+    val scope = mockTracer.activateSpan(span)
 
     try {
-      span = scope.span
       f = Future[Span] {
-        assert(mockTracer.scopeManager.active != null)
-        mockTracer.scopeManager.active.span
+        assert(mockTracer.scopeManager.activeSpan() != null)
+        mockTracer.scopeManager.activeSpan()
       }(ec)
     } finally {
       scope.close()
@@ -77,18 +75,17 @@ class TracedExecutionContextTest extends FunSuite with BeforeAndAfter {
 
   test("testCreateSpans") {
     val ec = new TracedExecutionContext(ExecutionContext.global, mockTracer, true)
-    var parentSpan: Span = null
-    val scope = mockTracer.buildSpan("parent").startActive(false)
+    val parentSpan = mockTracer.buildSpan("parent").start()
+    val parentScope: Scope = mockTracer.activateSpan(parentSpan)
     var f: Future[Span] = null
 
     try {
-      parentSpan = scope.span
       f = Future[Span] {
-        assert(mockTracer.scopeManager.active != null)
-        mockTracer.scopeManager.active.span
+        assert(mockTracer.scopeManager.activeSpan() != null)
+        mockTracer.scopeManager.activeSpan()
       }(ec)
     } finally {
-      scope.close()
+      parentScope.close()
     }
 
     val span: Span = Await.result(f, Duration(15, TimeUnit.SECONDS))
@@ -109,8 +106,8 @@ class TracedExecutionContextTest extends FunSuite with BeforeAndAfter {
     val ec = new TracedExecutionContext(ExecutionContext.global, mockTracer)
 
     val f: Future[Boolean] = Future[Boolean] {
-      assert(mockTracer.scopeManager.active == null)
-      mockTracer.scopeManager.active != null
+      assert(mockTracer.scopeManager.activeSpan() == null)
+      mockTracer.scopeManager.activeSpan() != null
     }(ec)
 
     val isActive = Await.result(f, Duration(15, TimeUnit.SECONDS))
@@ -122,8 +119,8 @@ class TracedExecutionContextTest extends FunSuite with BeforeAndAfter {
     val ec = new TracedExecutionContext(ExecutionContext.global)
 
     val f: Future[Boolean] = Future[Boolean] {
-      assert(mockTracer.scopeManager.active == null)
-      mockTracer.scopeManager.active != null
+      assert(mockTracer.scopeManager.activeSpan() == null)
+      mockTracer.scopeManager.activeSpan() != null
     }(ec)
 
     val isActive = Await.result(f, Duration(15, TimeUnit.SECONDS))
@@ -134,22 +131,23 @@ class TracedExecutionContextTest extends FunSuite with BeforeAndAfter {
   test("testConvert") {
     val ec = new TracedExecutionContext(ExecutionContext.global, mockTracer)
 
-    val scope = mockTracer.buildSpan("one").startActive(false)
+    val span = mockTracer.buildSpan("one").start()
+    val scope = mockTracer.activateSpan(span)
 
     try {
       Future[Boolean] {
-        assert(mockTracer.scopeManager.active != null)
-        mockTracer.scopeManager.active.span.setTag("main", true)
+        assert(mockTracer.scopeManager.activeSpan() != null)
+        mockTracer.scopeManager.activeSpan().setTag("main", true)
         true
       }(ec).andThen {
         case Success(_) =>
-          assert(mockTracer.scopeManager.active != null)
-          mockTracer.scopeManager.active.span.setTag("interceptor", true)
+          assert(mockTracer.scopeManager.activeSpan() != null)
+          mockTracer.scopeManager.activeSpan().setTag("interceptor", true)
         case Failure(_: Throwable) => fail()
       }(ec).onComplete { _ => {
-        assert(mockTracer.scopeManager.active != null)
-        mockTracer.scopeManager.active.span.setTag("done", true)
-        mockTracer.scopeManager.active.span.finish()
+        assert(mockTracer.scopeManager.activeSpan() != null)
+        mockTracer.scopeManager.activeSpan().setTag("done", true)
+        mockTracer.scopeManager.activeSpan().finish()
       }
       }(ec)
     } finally {
@@ -169,9 +167,7 @@ class TracedExecutionContextTest extends FunSuite with BeforeAndAfter {
   }
 
   private def reportedSpansSize(mockTracer: MockTracer): Callable[Int] = {
-    new Callable[Int] {
-      override def call(): Int = mockTracer.finishedSpans().size()
-    }
+    () => mockTracer.finishedSpans().size()
   }
 
 }

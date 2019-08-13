@@ -5,10 +5,16 @@ OpenTracing instrumentation for `scala.concurrent` package.
 
 ## Installation
 
-build.sbt
+### Scala 2.12
+```sbt
+libraryDependencies += "io.opentracing.contrib" % "opentracing-scala-concurrent_2.12" % "VERSION"
+```
+
+### Scala 2.13
 ```sbt
 libraryDependencies += "io.opentracing.contrib" % "opentracing-scala-concurrent_2.13" % "VERSION"
 ```
+
 
 ## Usage
 
@@ -30,7 +36,7 @@ val ec: ExecutionContext = new TracedExecutionContext(executionContext, tracer);
 Future {
   // The active Span at Future creation time, if any,  
   // will be captured and restored here.
-  tracer.scopeManager().active().setTag("status.code", getStatusCode())
+  tracer.activeSpan().setTag("status.code", getStatusCode())
 }(ec)
 ```
 
@@ -48,7 +54,7 @@ function:
 Future {  
    ...
 }(ec).onComplete { _ => {
-  tracer.scopeManager().active().span().finish()
+  tracer.activeSpan().finish()
 }
 }(ec)
 ```
@@ -64,7 +70,8 @@ val scopeManager = new AutoFinishScopeManager();
 val tracer: Tracer = ??? // Use the created scopeManager here.
 val ec = new TracedAutoFinishExecutionContext(executionContext, tracer)
 ...
-val scope = tracer.buildSpan("request").startActive(true)
+val span = tracer.buildSpan("request").start()
+val scope = tracer.activateSpan(span)
 try {
     Future {
 	// Span will be reactivated here
@@ -103,5 +110,5 @@ Future {
 [ci]: https://travis-ci.org/opentracing-contrib/scala-concurrent
 [cov-img]: https://coveralls.io/repos/github/opentracing-contrib/scala-concurrent/badge.svg?branch=master
 [cov]: https://coveralls.io/github/opentracing-contrib/scala-concurrent?branch=master
-[maven-img]: https://img.shields.io/maven-central/v/io.opentracing.contrib/opentracing-scala-concurrent_2.13.svg
-[maven]: http://search.maven.org/#search%7Cga%7C1%7Copentracing-scala-concurrent_2.13
+[maven-img]: https://img.shields.io/maven-central/v/io.opentracing.contrib/opentracing-scala-concurrent_2.12.svg
+[maven]: http://search.maven.org/#search%7Cga%7C1%7Copentracing-scala-concurrent_2.12
