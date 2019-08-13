@@ -20,16 +20,8 @@ import io.opentracing.{ScopeManager, Span}
 class AutoFinishScopeManager extends ScopeManager {
   private[concurrent] val tlsScope = new ThreadLocal[AutoFinishScope]
 
-  override def activate(span: Span, finishOnClose: Boolean): AutoFinishScope = {
-    new AutoFinishScope(this, new AtomicInteger(1), span)
-  }
-
   override def activate(span: Span): AutoFinishScope = {
-    activate(span, false)
-  }
-
-  override def active: AutoFinishScope = {
-    tlsScope.get
+    new AutoFinishScope(this, new AtomicInteger(1), span)
   }
 
   override def activeSpan: Span = {

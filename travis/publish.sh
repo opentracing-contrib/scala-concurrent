@@ -59,20 +59,20 @@ check_travis_branch_equals_travis_tag() {
 }
 
 check_release_tag() {
-    tag="${TRAVIS_TAG}"
-    if [[ "$tag" =~ ^opentracing-scala-concurrent_[[:digit:]]+\.[[:digit:]]+-[[:digit:]]+\.[[:digit:]]+\.[[:digit:]]+$ ]]; then
-        echo "Build started by version tag $tag. During the release process tags like this"
-        echo "are created by the 'release' Maven plugin. Nothing to do here."
-        exit 0
-    elif [[ ! "$tag" =~ ^release-[[:digit:]]+\.[[:digit:]]+\.[[:digit:]]+_[[:digit:]]+\.[[:digit:]]+$ ]]; then
-        echo "You must specify a tag of the format 'release-1.2.3_2.13' to release this project."
-        echo "The provided tag ${tag} doesn't match that. Aborting."
-        exit 1
-    fi
+  tag="${TRAVIS_TAG}"
+  if [[ "$tag" =~ ^opentracing-scala-concurrent_[[:digit:]]+\.[[:digit:]]+-[[:digit:]]+\.[[:digit:]]+\.[[:digit:]]+$ ]]; then
+    echo "Build started by version tag $tag. During the release process tags like this"
+    echo "are created by the 'release' Maven plugin. Nothing to do here."
+    exit 0
+  elif [[ ! "$tag" =~ ^release-[[:digit:]]+\.[[:digit:]]+\.[[:digit:]]+_[[:digit:]]+\.[[:digit:]]+$ ]]; then
+    echo "You must specify a tag of the format 'release-1.2.3_2.12' to release this project."
+    echo "The provided tag ${tag} doesn't match that. Aborting."
+    exit 1
+  fi
 }
 
 is_release_commit() {
-  project_version=$(./mvnw help:evaluate -N -Dexpression=project.version|grep -v '\[')
+  project_version=$(./mvnw help:evaluate -N -Dexpression=project.version | grep -v '\[')
   if [[ "$project_version" =~ ^[[:digit:]]+\.[[:digit:]]+\.[[:digit:]]+$ ]]; then
     echo "Build started by release commit $project_version. Will synchronize to maven central."
     return 0
@@ -82,7 +82,7 @@ is_release_commit() {
 }
 
 release_version() {
-    echo "${TRAVIS_TAG}" | sed 's/^release-//' | sed 's/_[0-9].[0-9]*//'
+  echo "${TRAVIS_TAG}" | sed 's/^release-//' | sed 's/_[0-9].[0-9]*//'
 }
 
 safe_checkout_master() {

@@ -49,15 +49,13 @@ class TracedAutoFinishExecutionContextTest extends FunSuite with BeforeAndAfter 
 
   test("testSimple") {
     val ec = new TracedAutoFinishExecutionContext(ExecutionContext.global, mockTracer)
-    val scope = mockTracer.buildSpan("one").startActive(true)
+    val span = mockTracer.buildSpan("one").start()
+    val scope = mockTracer.activateSpan(span)
 
-    var span: Span = null
     var f: Future[Span] = null
     try {
-      span = scope.span
       f = Future[Span] {
-        val activeScope = mockTracer.scopeManager.active
-        val activeSpan = activeScope.span
+        val activeSpan = mockTracer.scopeManager.activeSpan()
         activeSpan.setTag("done", true)
         activeSpan
       }(ec)
@@ -80,7 +78,8 @@ class TracedAutoFinishExecutionContextTest extends FunSuite with BeforeAndAfter 
     val ec = new TracedAutoFinishExecutionContext(ExecutionContext.global, mockTracer)
     val futures: ListBuffer[Future[Span]] = ListBuffer()
     val rand: Random = new Random
-    val scope = mockTracer.buildSpan("one").startActive(true)
+    val span = mockTracer.buildSpan("one").start
+    val scope = mockTracer.activateSpan(span)
 
     try
       for (_ <- 0 until 5) {
@@ -88,7 +87,7 @@ class TracedAutoFinishExecutionContextTest extends FunSuite with BeforeAndAfter 
           val sleepMs: Int = rand.nextInt(500)
           Thread.sleep(sleepMs)
 
-          val activeSpan: Span = mockTracer.scopeManager.active.span
+          val activeSpan: Span = mockTracer.scopeManager.activeSpan()
           assert(activeSpan != null)
           activeSpan.setTag(Integer.toString(sleepMs), true)
           activeSpan
@@ -98,7 +97,7 @@ class TracedAutoFinishExecutionContextTest extends FunSuite with BeforeAndAfter 
       scope.close()
     }
 
-    implicit val implicitContext = ec
+    implicit val implicitContext: TracedAutoFinishExecutionContext = ec
     Await.result(Future.sequence(futures), Duration(15, TimeUnit.SECONDS))
     await.atMost(15, TimeUnit.SECONDS).until(reportedSpansSize(mockTracer), equalTo(1))
     assert(1 == mockTracer.finishedSpans.size)
@@ -107,17 +106,18 @@ class TracedAutoFinishExecutionContextTest extends FunSuite with BeforeAndAfter 
 
   test("testPipeline") {
     val ec = new TracedAutoFinishExecutionContext(ExecutionContext.global, mockTracer)
-    val scope = mockTracer.buildSpan("one").startActive(true)
+    val span = mockTracer.buildSpan("one").start()
+    val scope = mockTracer.activateSpan(span)
     var f: Future[Future[Boolean]] = null
 
     try {
       f = Future[Future[Boolean]] {
-        assert(mockTracer.scopeManager.active != null)
-        mockTracer.scopeManager.active.span.setTag("1", true)
+        assert(mockTracer.scopeManager.activeSpan() != null)
+        mockTracer.scopeManager.activeSpan().setTag("1", true)
 
         Future[Boolean] {
-          assert(mockTracer.scopeManager.active != null)
-          mockTracer.scopeManager.active.span.setTag("2", true)
+          assert(mockTracer.scopeManager.activeSpan() != null)
+          mockTracer.scopeManager.activeSpan().setTag("2", true)
           true
         }(ec)
 
@@ -140,22 +140,23 @@ class TracedAutoFinishExecutionContextTest extends FunSuite with BeforeAndAfter 
 
   test("testConvert") {
     val ec = new TracedAutoFinishExecutionContext(ExecutionContext.global, mockTracer)
-    val scope = mockTracer.buildSpan("one").startActive(true)
+    val span = mockTracer.buildSpan("one").start()
+    val scope = mockTracer.activateSpan(span)
     var f: Future[String] = null
 
     try {
       f = Future[Int] {
         val result: Int = 1099
-        mockTracer.scopeManager.active.span.setTag("before.map", result)
+        mockTracer.scopeManager.activeSpan().setTag("before.map", result)
         result
       }(ec).map { x => {
         val result = x.toString
-        mockTracer.scopeManager.active.span.setTag("after.map", result)
+        mockTracer.scopeManager.activeSpan().setTag("after.map", result)
         result
       }
       }(ec).andThen {
-        case Success(_) => mockTracer.scopeManager.active.span.setTag("error", false)
-        case Failure(_: Throwable) => mockTracer.scopeManager.active.span.setTag("error", true)
+        case Success(_) => mockTracer.scopeManager.activeSpan().setTag("error", false)
+        case Failure(_: Throwable) => mockTracer.scopeManager.activeSpan().setTag("error", true)
       }(ec)
     } finally {
       scope.close()
@@ -169,9 +170,7 @@ class TracedAutoFinishExecutionContextTest extends FunSuite with BeforeAndAfter 
 
 
   private def reportedSpansSize(mockTracer: MockTracer): Callable[Int] = {
-    new Callable[Int] {
-      override def call(): Int = mockTracer.finishedSpans().size()
-    }
+    () => mockTracer.finishedSpans().size()
   }
 
 }
