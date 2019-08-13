@@ -14,11 +14,13 @@
     the License.
 
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>io.opentracing.contrib</groupId>
-  <artifactId>opentracing-scala-concurrent_2.12</artifactId>
-  <version>0.0.7-SNAPSHOT</version>
+  <artifactId>opentracing-scala-concurrent_2.13</artifactId>
+  <version>0.0.6-SNAPSHOT</version>
 
   <name>${project.groupId}:${project.artifactId}</name>
   <description>OpenTracing Instrumentation for Scala concurrent package</description>
@@ -62,11 +64,11 @@
 
     <opentracing.version>0.33.0</opentracing.version>
 
-    <!--    <scala.compat.version>2.13</scala.compat.version>-->
-    <!--    <scala.version>2.13.0</scala.version>-->
+    <scala.compat.version>2.13</scala.compat.version>
+    <scala.version>2.13.0</scala.version>
 
-    <scala.compat.version>2.12</scala.compat.version>
-    <scala.version>2.12.9</scala.version>
+    <!--    <scala.compat.version>2.12</scala.compat.version>-->
+    <!--    <scala.version>2.12.9</scala.version>-->
 
     <!--<scala.compat.version>2.11</scala.compat.version>-->
     <!--<scala.version>2.11.12</scala.version>-->
